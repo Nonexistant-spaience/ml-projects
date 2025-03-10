@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pickle
 import shap
@@ -129,7 +130,13 @@ input_data = [[age, ed_lvl, occu_type, rel_stat, city, empathy, anger, boundary,
 if st.button('Predict'):
     try:
         prediction = model.predict(input_data)
-        st.success(f"Prediction: {prediction[0]}")
+        result = "Safe" if prediction[0] == 1 else "Unsafe"
+        st.success(f"Prediction: {result}")
+        st.write("**Interpretation:**")
+        if prediction[0] == 1:
+            st.write("Based on the given inputs, the model predicts that this individual is generally safe.")
+        else:
+            st.write("The model predicts that this individual may pose a threat. Further evaluation is recommended.")
     except Exception as e:
         st.error(f"Error: {e}")
 
@@ -146,12 +153,14 @@ if st.button('XAI Interpretation'):
 
         # Feature Importance Plot (Summary Plot)
         st.subheader("Feature Importance (Summary Plot)")
+        st.write("This plot shows which features had the greatest influence on the model's prediction. Features further from zero have a stronger impact. **Red** means the feature increased the risk, while **blue** means it reduced the risk.")
         plt.figure(figsize=(10, 5))
         shap.summary_plot(shap_values, input_df)
         st.pyplot(plt)
 
         # Bar plot
         st.subheader("Feature Impact (Bar Chart)")
+        st.write("This bar chart ranks the features by their importance in making the prediction. Features at the top had the most influence on determining whether the individual is 'Safe' or 'Unsafe'.")
         fig, ax = plt.subplots()
         shap.summary_plot(shap_values.values, input_df, plot_type="bar")
         st.pyplot(fig)
